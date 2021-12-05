@@ -26,3 +26,10 @@ Continuing with rust
 cd adv3
 cargo run
 ```
+
+## 4 day
+Continuing with rust
+```sh
+cd adv4
+cargo run
+```
