@@ -3,16 +3,16 @@ use std::{fs::File, path::Path};
 
 fn main() {
     let data_file = "./data.txt";
-    let mut cur_line = 0;
+    let mut first_line = true;
     let mut boards: Vec<Board> = vec![];
     let mut current_board = Board::new();
     let mut number_string: String = "".to_owned();
     if let Ok(lines) = read_lines(data_file) {
         for line in lines {
             if let Ok(d) = line {
-                if cur_line == 0 {
+                if first_line {
                     number_string = d;
-                    cur_line += 1;
+                    first_line = false;
                 } else if d.trim() != "".to_owned() {
                     if current_board.is_full() {
                         boards.push(current_board);
@@ -30,16 +30,28 @@ fn main() {
         boards.push(current_board);
     }
 
+    resolve(boards.clone(), number_string.clone(), 1);
+    resolve(boards.clone(), number_string.clone(), 2);
+}
+
+fn resolve(mut boards: Vec<Board>, number_string: String, part: u8) {
     let mut winner: Board = Board::new();
-    let mut last_number = 0;
+    let mut exclude: Vec<usize> = vec![];
+    let mut winner_idx = 0;
+    let mut last_win_number = 0;
     'number_loop: for s in number_string.split(",") {
-        last_number = s.parse::<u16>().unwrap();
-        for b in &mut boards {
-            b.mark(last_number);
-            if b.won() {
-                println!("\n{:?} : {}", b, last_number);
-                winner = b.clone();
-                break 'number_loop;
+        let last_number = s.parse::<u16>().unwrap();
+        for idx in 0..boards.len() {
+            boards[idx].mark(last_number);
+            if boards[idx].won() && !exclude.contains(&idx) {
+                winner = boards[idx].clone();
+                last_win_number = last_number;
+                winner_idx = idx;
+                if part == 1 {
+                    break 'number_loop;
+                } else {
+                    exclude.push(idx);
+                }
             }
         }
     }
@@ -49,17 +61,20 @@ fn main() {
         _ => u32::MAX,
     };
 
-    let last_number = match u32::try_from(last_number) {
+    let last_number = match u32::try_from(last_win_number) {
         Ok(c) => c,
         _ => u32::MAX,
     };
 
     println!(
-        "board: {:?}, last_number: {}, sum: {}, result: {}",
+        "\nPart: {}, board: {:?}, last_/win/_number: {}/{}, sum: {}, result: {}, Winner idx: {}",
+        part,
         winner,
+        last_win_number,
         last_number,
         sum,
-        sum * &last_number
+        sum * &last_number,
+        winner_idx
     );
 }
 
@@ -122,7 +137,7 @@ impl Board {
     pub fn won(&self) -> bool {
         let mut found_row = false;
         let mut found_col = false;
-        'rows: for i in 0..5 {
+        for i in 0..5 {
             found_row = true;
             found_col = true;
             for j in 0..5 {
@@ -132,10 +147,13 @@ impl Board {
                 if self.filler[j][i] == 0 {
                     found_col = false;
                 }
+                if !found_col && !found_row {
+                    break;
+                }
             }
 
             if found_col || found_row {
-                break 'rows;
+                break;
             }
         }
 
