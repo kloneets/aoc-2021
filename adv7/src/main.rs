@@ -4,42 +4,30 @@ fn main() {
         .split(",")
         .map(|s| s.parse().unwrap())
         .collect();
-    part_one(crab_positions.clone());
-    part_two(crab_positions);
+    solve(crab_positions.clone(), 1);
+    solve(crab_positions, 2);
 }
 
-fn part_two(crab_positions: Vec<i32>) {
+fn solve(crab_positions: Vec<i32>, part: u8) {
     let max_pos = crab_positions.iter().max().unwrap().clone();
     let min_pos = crab_positions.iter().min().unwrap().clone();
     let mut less_fuel = -1;
     for i in min_pos..max_pos + 1 {
         let mut cost = 0;
         for crab in &crab_positions {
-            cost += arithmetic_progression(i32::abs(crab - i));
+            if part == 1 {
+                cost += i32::abs(crab - i);
+            } else {
+                cost += arithmetic_progression(i32::abs(crab - i));
+            }
         }
         if less_fuel == -1 || cost < less_fuel {
             less_fuel = cost;
         }
     }
-    println!("Cost: {}", less_fuel);
+    println!("Part {}. Cost: {}", part, less_fuel);
 }
 
 fn arithmetic_progression(cost: i32) -> i32 {
     (cost * (1 + cost)) / 2
-}
-
-fn part_one(crab_positions: Vec<i32>) {
-    let max_pos = crab_positions.iter().max().unwrap().clone();
-    let min_pos = crab_positions.iter().min().unwrap().clone();
-    let mut less_fuel = -1;
-    for i in min_pos..max_pos + 1 {
-        let mut cost = 0;
-        for crab in &crab_positions {
-            cost += i32::abs(crab - i);
-        }
-        if less_fuel == -1 || cost < less_fuel {
-            less_fuel = cost;
-        }
-    }
-    println!("Cost: {}", less_fuel);
 }
