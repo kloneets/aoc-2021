@@ -36,6 +36,12 @@ cargo run
 
 ## 5 day
 ```sh
-cd adv4
+cd adv5
+cargo run
+```
+
+## 6 day
+```sh
+cd adv6
 cargo run
 ```
