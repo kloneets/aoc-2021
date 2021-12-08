@@ -33,3 +33,9 @@ Continuing with rust
 cd adv4
 cargo run
 ```
+
+## 5 day
+```sh
+cd adv4
+cargo run
+```
