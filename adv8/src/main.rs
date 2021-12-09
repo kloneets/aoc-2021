@@ -21,10 +21,6 @@ fn main() {
     let (d, res) = get_data(data);
     println!("Part 1. Ct: {}", find_unique(res.clone()));
     solve(d, res, basic_map);
-    // 2 - one
-    // 3 - seven
-    // 4 - four
-    // 7 - eight
 }
 
 fn solve(data: Vec<Vec<String>>, res: Vec<Vec<String>>, basics: Vec<Vec<i32>>) {
