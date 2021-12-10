@@ -14,7 +14,7 @@ php result.php
 php result2.php
 ```
 
-## 2, 3, 4, 5, 6, 7, 8, 9 day
+## 2, 3, 4, 5, 6, 7, 8, 9, 10 day
 I want to learn rust, so there is a bit of lame code, unnecessary copy/paste etc.
 ```sh
 # replace 2 with day you desire to run
