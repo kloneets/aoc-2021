@@ -3,7 +3,7 @@ use std::io::{self, BufRead};
 use std::{fs::File, path::Path};
 
 fn main() {
-    let data = read_data("./data.txt".to_owned());
+    let data = read_data("./debug.txt".to_owned());
     let paired_data: Vec<Vec<&str>> = data
         .iter()
         .map(|s| {
@@ -14,18 +14,25 @@ fn main() {
     println!("Data: {:?}", paired_data);
     let tree = build_nodes(paired_data);
     println!("tree {:?}", tree);
-    let paths = walk_nodes("start", tree, vec![]);
+    let paths = walk_nodes("start", tree.clone(), vec![], 1);
     let finished: Vec<Vec<&str>> = paths
         .into_iter()
         .filter(|path| path[path.len() - 1] == "end")
         .collect();
-    println!("Paths count: {}", finished.len());
+    println!("Part 1. Paths count: {}", finished.len());
+    let paths = walk_nodes("start", tree, vec![], 2);
+    let finished: Vec<Vec<&str>> = paths
+        .into_iter()
+        .filter(|path| path[path.len() - 1] == "end")
+        .collect();
+    println!("Part 2. Paths count: {}", finished.len());
 }
 
 fn walk_nodes<'a>(
     node: &'a str,
     tree: HashMap<&str, Vec<&'a str>>,
     done: Vec<&'a str>,
+    times: usize,
 ) -> Vec<Vec<&'a str>> {
     let mut paths: Vec<Vec<&'a str>> = vec![];
     let mut d = done.clone();
@@ -33,8 +40,26 @@ fn walk_nodes<'a>(
     if node != "end" {
         let next = tree.get(node).unwrap();
         for next_node in next {
-            if next_node.to_uppercase() == next_node.to_owned() || !d.contains(next_node) {
-                let mut p = walk_nodes(next_node, tree.clone(), d.clone());
+            let mut keyed = HashMap::new();
+            for c in &d {
+                if &c.to_uppercase().as_str() != c {
+                    keyed.entry(c).or_insert(vec![]).push(c);
+                }
+            }
+            let mut small_times = true;
+            if keyed.contains_key(next_node) {
+                small_times = keyed.get(next_node).unwrap().len() < times;
+            }
+            let mut no_parasites = true;
+            for (_, v) in keyed {
+                if v.len() >= times && times != 1 {
+                    println!("parasite: {:?}, d {:?}", v, d);
+                    no_parasites = false;
+                    break;
+                }
+            }
+            if &next_node.to_uppercase().as_str() == next_node || (small_times && no_parasites) {
+                let mut p = walk_nodes(next_node, tree.clone(), d.clone(), times);
                 paths.append(&mut p);
             }
         }
@@ -46,15 +71,15 @@ fn walk_nodes<'a>(
 fn build_nodes(data: Vec<Vec<&str>>) -> HashMap<&str, Vec<&str>> {
     let mut nodes: HashMap<&str, Vec<&str>> = HashMap::new();
     for d in data {
-        if nodes.contains_key(d[0]) {
+        if nodes.contains_key(d[0]) && d[1] != "start" {
             nodes.get_mut(d[0]).map(|p| p.push(d[1]));
-        } else {
+        } else if d[1] != "start" {
             nodes.insert(d[0], vec![d[1]]);
         }
 
-        if nodes.contains_key(d[1]) {
+        if nodes.contains_key(d[1]) && d[0] != "start" {
             nodes.get_mut(d[1]).map(|p| p.push(d[0]));
-        } else {
+        } else if d[0] != "start" {
             nodes.insert(d[1], vec![d[0]]);
         }
     }
